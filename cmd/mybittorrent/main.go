@@ -45,6 +45,7 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 			if err != nil {
 				return "", err
 			}
+			decimalNumber *= -1
 		} else {
 			decimalNumber, err =  strconv.Atoi(number)
 			if err != nil {
