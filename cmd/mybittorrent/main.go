@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"unicode"
 	// bencode "github.com/jackpal/bencode-go" // Available if you need it!
 )
@@ -71,11 +72,7 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 				return "", err
 			}
 			list = append(list, item)
-
-		}
-
-		func splitEncodedItem(s string) (string, string, err) {
-
+			_, encodedList, _ = splitEncodedItem(encodedList)
 		}
 		
 		return list, nil
@@ -106,5 +103,54 @@ func main() {
 	} else {
 		fmt.Println("Unknown command: " + command)
 		os.Exit(1)
+	}
+}
+
+func splitEncodedItem(s string) (string, string, error) {
+	if len(s) == 0 {
+		return "", "", fmt.Errorf("empty string")
+	}
+
+	switch s[0] {
+	case 'i':
+		endIndex := strings.IndexByte(s, 'e')
+		
+		if endIndex == -1 {
+			return "", "", fmt.Errorf("malformed integer")
+		}
+		return s[:endIndex+1], s[endIndex+1:], nil
+
+	case 'l':
+		depth := 0
+
+		for i, char := range s {
+			if char == 'l' {
+				depth++
+			} else if char == 'e' {
+				depth--
+				if depth == 0 {
+					return s[:i+1], s[i+1:], nil
+				}
+			}
+		}
+		return "", "", fmt.Errorf("malformed list")
+
+	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		colonIndex := strings.IndexByte(s, ':')
+		if colonIndex == -1 {
+			return "", "", fmt.Errorf("malformed string")
+		}
+		length, err := strconv.Atoi(s[:colonIndex])
+		if err!= nil {
+			return "", "", err
+		}
+		endIndex := colonIndex + length + 1
+		if endIndex > len(s) {
+			return "", "", fmt.Errorf("string length exceeds available data")
+		}
+		return s[:endIndex], s[endIndex:], nil
+
+	default:
+		return "", "", fmt.Errorf("unsupported type identifier : %c", s[0])
 	}
 }
