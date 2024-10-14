@@ -65,7 +65,7 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 		var strLength int
 		var intStartIndex int
 		var intEndIndex int
-		var list []string
+		list := []string{}
 
 		for index, value := range encodedList {
 			// Identify potential strings
