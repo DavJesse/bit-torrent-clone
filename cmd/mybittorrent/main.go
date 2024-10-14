@@ -65,7 +65,7 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 		var strLength int
 		var intStartIndex int
 		var intEndIndex int
-		var list []string
+		var list string = "["
 
 		for index, value := range encodedList {
 			// Identify potential strings
@@ -74,7 +74,7 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 				if err != nil {
 					return "", err
 				}
-				list = append(list, encodedList[index+1:index+strLength+1])
+				list += encodedList[index+1:index+strLength+1]+ ", "
 			}
 
 			// identify potential integers
@@ -88,10 +88,10 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 					}
 				}
 
-				list = append(list, encodedList[intStartIndex:intEndIndex])
+				list += encodedList[intStartIndex:intEndIndex]
 			}			
 		}
-		return list, nil
+		return list + "]", nil
 	} else {
 		return "", fmt.Errorf("only strings are supported at the moment")
 	}
