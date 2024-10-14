@@ -62,35 +62,22 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 	}  else if bencodedString[0] == 'l'{
 		encodedList := bencodedString[1:len(bencodedString)-1]
 		var err error
-		var strLength int
-		var intStartIndex int
-		var intEndIndex int
+		var item interface{}
 		var list []interface{}
 
-		for index, value := range encodedList {
-			// Identify potential strings
-			if value == ':' {
-				strLength, err = strconv.Atoi(string(encodedList[index-1]))
-				if err != nil {
-					return "", err
-				}
-				list = append(list, encodedList[index+1:index+strLength+1])
+		for len(encodedList) > 0 {
+			item, err = decodeBencode(encodedList)
+			if err != nil {
+				return "", err
 			}
+			list = append(list, item)
 
-			// identify potential integers
-			if value == 'i' {
-				intStartIndex = index + 1 // Establish start of int sequence
-
-				for i, v := range encodedList[intStartIndex:] {
-					if v == 'e' {
-						intEndIndex = i + intStartIndex // Establish start of int sequence
-						break
-					}
-				}
-
-				list = append(list, encodedList[intStartIndex:intEndIndex])
-			}			
 		}
+
+		func splitEncodedItem(s string) (string, string, err) {
+
+		}
+		
 		return list, nil
 	} else {
 		return "", fmt.Errorf("only strings are supported at the moment")
