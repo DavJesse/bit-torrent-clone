@@ -16,6 +16,7 @@ var _ = json.Marshal
 // - 5:hello -> hello
 // - 10:hello12345 -> hello12345
 func decodeBencode(bencodedString string) (interface{}, error) {
+	// decode strings
 	if unicode.IsDigit(rune(bencodedString[0])) {
 		var firstColonIndex int
 
@@ -34,6 +35,8 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 		}
 
 		return bencodedString[firstColonIndex+1 : firstColonIndex+1+length], nil
+
+		// Decode integers
 	} else if string(bencodedString[0]) == "i" {
 		var decimalNumber int
 		var err error
@@ -54,6 +57,41 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 		}
 
 		return decimalNumber, nil
+
+		// Decode lists
+	}  else if bencodedString[0] == 'l'{
+		encodedList := bencodedString[1:len(bencodedString)-1]
+		var err error
+		var strLength int
+		var intStartIndex int
+		var intEndIndex int
+		var list []string
+
+		for index, value := range encodedList {
+			// Identify potential strings
+			if value == ':' {
+				strLength, err = strconv.Atoi(string(encodedList[index-1]))
+				if err != nil {
+					return "", err
+				}
+				list = append(list, encodedList[index+1:index+strLength+1])
+			}
+
+			// identify potential integers
+			if value == 'i' {
+				intStartIndex = index + 1 // Establish start of int sequence
+
+				for i, v := range encodedList[intStartIndex:] {
+					if v == 'e' {
+						intEndIndex = i + intStartIndex // Establish start of int sequence
+						break
+					}
+				}
+
+				list = append(list, encodedList[intStartIndex:intEndIndex])
+			}			
+		}
+		return list, nil
 	} else {
 		return "", fmt.Errorf("Only strings are supported at the moment")
 	}
