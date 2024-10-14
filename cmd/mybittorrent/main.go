@@ -93,7 +93,7 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 		}
 		return list, nil
 	} else {
-		return "", fmt.Errorf("Only strings are supported at the moment")
+		return "", fmt.Errorf("only strings are supported at the moment")
 	}
 }
 
