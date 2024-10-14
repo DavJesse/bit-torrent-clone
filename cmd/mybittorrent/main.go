@@ -75,6 +75,9 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 			_, encodedList, _ = splitEncodedItem(encodedList)
 		}
 		
+		if list == nil {
+			return []string{}, nil
+		}
 		return list, nil
 	} else {
 		return "", fmt.Errorf("only strings are supported at the moment")
