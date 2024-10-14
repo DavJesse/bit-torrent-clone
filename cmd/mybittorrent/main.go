@@ -17,6 +17,11 @@ var _ = json.Marshal
 // - 5:hello -> hello
 // - 10:hello12345 -> hello12345
 func decodeBencode(bencodedString string) (interface{}, error) {
+
+	if len(bencodedString) == 0 {
+		return nil, fmt.Errorf("empty string")
+	}
+	
 	// decode strings
 	if unicode.IsDigit(rune(bencodedString[0])) {
 		var firstColonIndex int
@@ -42,7 +47,7 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 		var decimalNumber int
 		var err error
 
-		number := bencodedString[1:len(bencodedString)-1]
+		number := bencodedString[1 : len(bencodedString)-1]
 
 		if string(number[0]) == "-" {
 			decimalNumber, err = strconv.Atoi(number[1:])
@@ -51,7 +56,7 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 			}
 			decimalNumber *= -1
 		} else {
-			decimalNumber, err =  strconv.Atoi(number)
+			decimalNumber, err = strconv.Atoi(number)
 			if err != nil {
 				return "", err
 			}
@@ -60,8 +65,8 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 		return decimalNumber, nil
 
 		// Decode lists
-	}  else if bencodedString[0] == 'l'{
-		encodedList := bencodedString[1:len(bencodedString)-1]
+	} else if bencodedString[0] == 'l' {
+		encodedList := bencodedString[1 : len(bencodedString)-1]
 		var err error
 		var item interface{}
 		var list []interface{}
@@ -74,7 +79,7 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 			list = append(list, item)
 			_, encodedList, _ = splitEncodedItem(encodedList)
 		}
-		
+
 		if list == nil {
 			return []string{}, nil
 		}
@@ -92,15 +97,15 @@ func main() {
 
 	if command == "decode" {
 		// Uncomment this block to pass the first stage
-		
+
 		bencodedValue := os.Args[2]
-		
+
 		decoded, err := decodeBencode(bencodedValue)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		
+
 		jsonOutput, _ := json.Marshal(decoded)
 		fmt.Println(string(jsonOutput))
 	} else {
@@ -117,7 +122,7 @@ func splitEncodedItem(s string) (string, string, error) {
 	switch s[0] {
 	case 'i':
 		endIndex := strings.IndexByte(s, 'e')
-		
+
 		if endIndex == -1 {
 			return "", "", fmt.Errorf("malformed integer")
 		}
@@ -144,7 +149,7 @@ func splitEncodedItem(s string) (string, string, error) {
 			return "", "", fmt.Errorf("malformed string")
 		}
 		length, err := strconv.Atoi(s[:colonIndex])
-		if err!= nil {
+		if err != nil {
 			return "", "", err
 		}
 		endIndex := colonIndex + length + 1
